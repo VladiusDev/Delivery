@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "369185191355",
+    "firebase_url": "https://shels-delivery-service.firebaseio.com",
+    "project_id": "shels-delivery-service",
+    "storage_bucket": "shels-delivery-service.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369185191355:android:ea6bae74ed55fb7840409e",
+        "android_client_info": {
+          "package_name": "com.shels.delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369185191355-h52sv73idmk8vnmtr6hpc4uo3qcbab0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shels.delivery",
+            "certificate_hash": "7b8cb071556d4ba837b908923d8ed6429595fdc9"
+          }
+        },
+        {
+          "client_id": "369185191355-krc7anhub5ea1ehsdc1tg31cnrik89iv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDW-6r6PJLawgjwwztxY5TrdoPXa-vuGI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369185191355-krc7anhub5ea1ehsdc1tg31cnrik89iv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

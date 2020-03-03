@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".Activity.MainActivity">
+
+    <View
+        android:id="@+id/main_emptyView"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:background="@color/mainColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></View>
+
+    <SearchView
+        android:id="@+id/main_searchView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/search_view"
+        android:focusable="false"
+        android:iconifiedByDefault="false"
+        android:queryBackground="@color/transparent"
+        app:layout_constraintEnd_toStartOf="@+id/main_button_exit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></SearchView>
+
+    <Button
+        android:id="@+id/main_button_exit"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/ic_exit_to_app_black_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/main_searchView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/main_searchView"></Button>
+
+    <RelativeLayout
+        android:id="@+id/main_relativeLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_emptyView">
+
+         <com.google.android.material.tabs.TabLayout
+             android:id="@+id/main_TabLayout"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@color/mainColor"
+             android:elevation="6dp"
+             app:tabIndicatorColor="@android:color/white"
+             app:tabTextAppearance="@style/TabLayoutTextStyle"/>
+
+        <androidx.viewpager.widget.ViewPager
+             android:id="@+id/main_pager"
+             android:layout_width="match_parent"
+             android:layout_height="fill_parent"
+             android:layout_below="@id/main_TabLayout"/>
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

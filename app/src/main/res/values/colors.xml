@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#ff707c</color>
+    <color name="loginBackground">#396ec4</color>
+    <color name="inputColor">#ebf2ed</color>
+    <color name="button_auth">#19f77d</color>
+    <color name="hint">#8c857e</color>
+    <color name="mainColor2">#E31E25</color>
+    <color name="mainColor">#ff4249</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="transparent">#000000FF</color>
+    <color name="document_card">#f5f5f5</color>
+    <color name="product_scanned_ok">#b8ffcb</color>
+    <color name="product_scanned_many">#ffa8a8</color>
+</resources>
