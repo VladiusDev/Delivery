@@ -12,6 +12,8 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.shels.delivery.Activity.DocumentActivity;
 import com.shels.delivery.Adapters.DocumentsAdapter;
 import com.shels.delivery.AuthorizationUtils;
@@ -55,6 +58,9 @@ public class DocumentsFragment extends Fragment {
     private Activity activity;
     private SearchView searchView;
     private FloatingActionButton floatingActionButton;
+    private ConstraintLayout constraintLayout;
+
+    private final static int DELIVERY_ACT_SAVE_CODE = 1;
 
     public DocumentsFragment() {
 
@@ -71,6 +77,7 @@ public class DocumentsFragment extends Fragment {
         productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
         barcodeViewModel = ViewModelProviders.of(this).get(BarcodeViewModel.class);
 
+        constraintLayout = view.findViewById(R.id.documents_constraintLayout);
         timeTextView = view.findViewById(R.id.documents_time);
         completedTextView = view.findViewById(R.id.documents_completed);
         searchView = activity.findViewById(R.id.main_searchView);
@@ -131,7 +138,7 @@ public class DocumentsFragment extends Fragment {
 
                 Intent intent = new Intent(activity, DocumentActivity.class);
                 intent.putExtra("deliveryActId", deliveryAct.getId());
-                startActivity(intent);
+                startActivityForResult(intent, DELIVERY_ACT_SAVE_CODE);
             }
         });
 
@@ -207,4 +214,12 @@ public class DocumentsFragment extends Fragment {
         completedTextView.setText(completedTasks + "/" + quantityTasks);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == DELIVERY_ACT_SAVE_CODE){
+            Snackbar snackbar = Snackbar
+                    .make(constraintLayout, getResources().getString(R.string.document_saved), Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
+    }
 }

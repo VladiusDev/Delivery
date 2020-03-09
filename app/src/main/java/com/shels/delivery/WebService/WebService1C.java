@@ -54,7 +54,7 @@ public class WebService1C {
         }
 
         // Create enveloper
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER10);
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.dotNet = true;
 
         // Set output SOAP object

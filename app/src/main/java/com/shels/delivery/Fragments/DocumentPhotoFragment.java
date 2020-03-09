@@ -198,4 +198,5 @@ public class DocumentPhotoFragment extends Fragment {
             }
         }
     }
+
 }

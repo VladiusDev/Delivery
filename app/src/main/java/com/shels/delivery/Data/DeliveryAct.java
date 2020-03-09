@@ -52,7 +52,7 @@ public class DeliveryAct {
     private String warehouseSender;
     private String time;
     private String barcode;
-    private int type; // 1 - Реализация 1 - Вывоз рекламации 3 - Доставка по рекламации 4 - Перемещение товаров
+    private int type; // 1 - Реализация 2 - Вывоз рекламации 3 - Доставка по рекламации 4 - Перемещение товаров
     private int status; // 0 - Не доставлено, 1 - Доставлено, 2 - Доставлено частично
     private List<String> documentsPhotos;
 

@@ -9,6 +9,7 @@ public class Constants {
 
     public static final String SOAP_METHOD_GET_DELIVERY_ACTS = "getDeliveryActs";
     public static final String SOAP_METHOD_GET_USER_INFO = "getUserInfo";
+    public static final String SOAP_METHOD_SAVE_DOCUMENT = "saveDocument";
 
     // User preferences
     public static final String PREFERENCE_USER = "pref_username";

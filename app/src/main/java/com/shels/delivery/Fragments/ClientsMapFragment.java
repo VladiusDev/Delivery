@@ -48,13 +48,6 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
     private Session searchSession;
     private SearchManager searchManager;
 
-    private final CameraListener cameraListener = new CameraListener() {
-        @Override
-        public void onCameraPositionChanged(@NonNull Map map, @NonNull CameraPosition cameraPosition, @NonNull CameraUpdateSource cameraUpdateSource, boolean b) {
-
-        }
-    };
-
     public ClientsMapFragment() {
 
     }
@@ -149,6 +142,13 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
     public void onSearchError(@NonNull Error error) {
 
     }
+
+    private final CameraListener cameraListener = new CameraListener() {
+        @Override
+        public void onCameraPositionChanged(@NonNull Map map, @NonNull CameraPosition cameraPosition, @NonNull CameraUpdateSource cameraUpdateSource, boolean b) {
+
+        }
+    };
 
     @Override
     public boolean onMapObjectTap(@NonNull MapObject mapObject, @NonNull Point point) {

@@ -2,19 +2,27 @@ package com.shels.delivery.Fragments;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,9 +30,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.shels.delivery.Constants;
 import com.shels.delivery.Data.DeliveryAct;
 import com.shels.delivery.DataBaseUtils.ViewModel.DeliveryActsViewModel;
+import com.shels.delivery.DialogFactory;
 import com.shels.delivery.R;
+import com.shels.delivery.WebService.WebService1C;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.GeoObjectCollection;
 import com.yandex.mapkit.geometry.Point;
@@ -44,6 +55,14 @@ import com.yandex.mapkit.search.Session;
 import com.yandex.runtime.Error;
 import com.yandex.runtime.image.ImageProvider;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.List;
+
 
 public class DocumentClientFragment extends Fragment implements Session.SearchListener, CameraListener {
     private String documentId;
@@ -55,7 +74,12 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
     private MapView mapView;
     private SearchManager searchManager;
     private Session searchSession;
+    private Button buttonExecuteTask;
+    private ProgressBar progressBar;
+    private Activity activity;
+
     private static final int REQUEST_PHONE_CALL = 1;
+
 
     public DocumentClientFragment() {
 
@@ -70,6 +94,10 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
 
         deliveryActsViewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
 
+        activity = getActivity();
+
+        progressBar = view.findViewById(R.id.document_progressBar);
+        buttonExecuteTask = view.findViewById(R.id.document_btn_execute_task);
         client = view.findViewById(R.id.document_client);
         phone = view.findViewById(R.id.document_phone);
         address = view.findViewById(R.id.document_address);
@@ -78,6 +106,13 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
             @Override
             public void onClick(View v) {
                call();
+            }
+        });
+
+        buttonExecuteTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                executeTask();
             }
         });
 
@@ -108,6 +143,12 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
                 VisibleRegionUtils.toPolygon(mapView.getMap().getVisibleRegion()),
                 new SearchOptions(),
                 this);
+    }
+
+    private void executeTask(){
+        List<String> files  = deliveryAct.getDocumentsPhotos();
+
+        new SendDataTo1C().execute(files);
     }
 
     @Override
@@ -203,4 +244,85 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
             alertDialog.show();
         }
     }
+
+    private class SendDataTo1C extends AsyncTask<List<String>, Void, ContentValues> {
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(ContentValues result) {
+            if ((Boolean) result.get(Constants.WEB_SERVICE_AUTH) == true) {
+                // Установим статус документа в БД
+                deliveryAct.setStatus(1);
+
+                deliveryActsViewModel.updateDeliveryAct(deliveryAct);
+
+                activity.setResult(1);
+                activity.finish();
+            }else{
+                progressBar.setVisibility(View.GONE);
+
+                DialogFactory.showAlertDialog(getContext(), result.get(Constants.WEB_SERVICE_MSG).toString());
+            }
+
+
+        }
+
+        @Override
+        protected ContentValues doInBackground(List<String>... lists) {
+            // Сформируем JSON ответ
+            HashMap<String, String> args = new HashMap<>();
+            JSONObject jsonAnswer = new JSONObject();
+            JSONArray jsonFiles = new JSONArray();
+
+            try {
+                jsonAnswer.put("documentId", deliveryAct.getId());
+                jsonAnswer.put("documentType", deliveryAct.getType());
+                jsonAnswer.put("deliveryActId", deliveryAct.getActId());
+
+                if (lists.length > 0 && lists != null) {
+                    if (lists[0].size() > 0) {
+                        for (String file : lists[0]) {
+                            String base64String = encodeImageToBase64(file);
+
+                            jsonFiles.put(base64String);
+                        }
+                    }
+                }
+
+                jsonAnswer.put("pictures", jsonFiles);
+
+                args.put("data", jsonAnswer.toString());
+
+                // Отправим запрос в 1С
+                return WebService1C.sendRequest(Constants.SOAP_METHOD_SAVE_DOCUMENT, getContext(), args);
+            } catch (JSONException e) {
+                ContentValues cv = new ContentValues();
+                cv.put(Constants.WEB_SERVICE_MSG, e.toString());
+                cv.put(Constants.WEB_SERVICE_AUTH, false);
+                cv.put(Constants.WEB_SERVICE_RESULT, "");
+
+                return cv;
+            }
+        }
+    }
+
+    String encodeImageToBase64(String file){
+        // Получаем битовую карту изображения
+        Bitmap bitmap = BitmapFactory.decodeFile(file);
+
+        // Записываем изображение в поток байтов
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+
+        // Получаем изображение из потока в виде байтов
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+
+        // Кодируем байты в строку base64
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
 }

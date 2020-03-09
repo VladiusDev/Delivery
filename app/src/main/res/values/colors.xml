@@ -16,4 +16,5 @@
     <color name="document_card">#f5f5f5</color>
     <color name="product_scanned_ok">#b8ffcb</color>
     <color name="product_scanned_many">#ffa8a8</color>
+    <color name="button_execute_task">#c9d99c</color>
 </resources>
