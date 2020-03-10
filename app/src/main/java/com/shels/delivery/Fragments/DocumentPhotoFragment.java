@@ -15,9 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -46,6 +48,9 @@ public class DocumentPhotoFragment extends Fragment {
     private DeliveryActsViewModel deliveryActsViewModel;
     private DeliveryAct deliveryAct;
     private String currentPhotoPath;
+    private LinearLayout progressBar;
+    private CardView cardViewPhotos;
+    private LinearLayout linearLayoutEmpty;
     private final int REQUEST_CAMERA = 1;
 
     public DocumentPhotoFragment() {
@@ -62,6 +67,9 @@ public class DocumentPhotoFragment extends Fragment {
         documentId = getArguments().getString("documentId");
         deliveryAct = deliveryActsViewModel.getDeliveryActById(documentId);
 
+        linearLayoutEmpty = view.findViewById(R.id.document_photo_empty);
+        cardViewPhotos = view.findViewById(R.id.document_photo_cw);
+        progressBar = view.findViewById(R.id.document_photo_progressBar);
         floatingActionButton = view.findViewById(R.id.document_photo_floatingButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,12 +141,10 @@ public class DocumentPhotoFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        switch (requestCode) {
-            case REQUEST_CAMERA:
-                savePictureToCache();
+        if (requestCode == REQUEST_CAMERA && resultCode == -1) {
+            savePictureToCache();
 
-                displayPictures();
-                break;
+            displayPictures();
         }
     }
 
@@ -182,10 +188,17 @@ public class DocumentPhotoFragment extends Fragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected void onPostExecute(final Bitmap[] bitmaps) {
+            progressBar.setVisibility(View.GONE);
+
             if (bitmaps != null && bitmaps.length > 0) {
-                for (Bitmap bitmap : bitmaps){
-                    if (bitmap != null){
+                for (Bitmap bitmap : bitmaps) {
+                    if (bitmap != null) {
                         carouselView.setImageListener(new ImageListener() {
                             @Override
                             public void setImageForPosition(int position, ImageView imageView) {
@@ -195,7 +208,14 @@ public class DocumentPhotoFragment extends Fragment {
                         carouselView.setPageCount(bitmaps.length);
                     }
                 }
+
+                cardViewPhotos.setVisibility(View.VISIBLE);
+                linearLayoutEmpty.setVisibility(View.INVISIBLE);
+            }else{
+                cardViewPhotos.setVisibility(View.INVISIBLE);
+                linearLayoutEmpty.setVisibility(View.VISIBLE);
             }
+
         }
     }
 

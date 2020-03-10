@@ -20,6 +20,12 @@ public interface ProductDao {
     @Query("SELECT * FROM products WHERE documentId = :documentId AND productId = :productId")
     Product getProductByProductDocumentId(String productId, String documentId);
 
+    @Query("SELECT sum(scanned) FROM products WHERE documentId = :documentId")
+    int getScanned(String documentId);
+
+    @Query("SELECT sum(amount) FROM products WHERE documentId = :documentId")
+    int getAmount(String documentId);
+
     @Update
     void updateProduct(Product product);
 

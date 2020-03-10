@@ -22,7 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,6 +33,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.shels.delivery.Constants;
 import com.shels.delivery.Data.DeliveryAct;
 import com.shels.delivery.DataBaseUtils.ViewModel.DeliveryActsViewModel;
+import com.shels.delivery.DataBaseUtils.ViewModel.ProductViewModel;
 import com.shels.delivery.DialogFactory;
 import com.shels.delivery.R;
 import com.shels.delivery.WebService.WebService1C;
@@ -71,11 +72,12 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
     private TextView address;
     private DeliveryAct deliveryAct;
     private DeliveryActsViewModel deliveryActsViewModel;
+    private ProductViewModel productViewModel;
     private MapView mapView;
     private SearchManager searchManager;
     private Session searchSession;
     private Button buttonExecuteTask;
-    private ProgressBar progressBar;
+    private LinearLayout progressBar;
     private Activity activity;
 
     private static final int REQUEST_PHONE_CALL = 1;
@@ -93,6 +95,7 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
         documentId = getArguments().getString("documentId");
 
         deliveryActsViewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
+        productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
 
         activity = getActivity();
 
@@ -246,6 +249,29 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
     }
 
     private class SendDataTo1C extends AsyncTask<List<String>, Void, ContentValues> {
+        int amount;
+        int scanned;
+        int status;
+
+        public SendDataTo1C() {
+            // Определим статус документа перед отправкой по кол-ву отсканированного товара
+            amount = productViewModel.getAmount(documentId);
+            scanned = productViewModel.getScanned(documentId);
+
+            if (scanned != 0) {
+                if (scanned >= amount) {
+                    // Доставлен
+                    status = 1;
+                } else if (amount > scanned) {
+                    // Частично доставлен
+                    status = 2;
+                } else {
+                    status = 0;
+                }
+            }else{
+                status = 0;
+            }
+        }
 
         @Override
         protected void onPreExecute() {
@@ -255,20 +281,33 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
         @Override
         protected void onPostExecute(ContentValues result) {
             if ((Boolean) result.get(Constants.WEB_SERVICE_AUTH) == true) {
-                // Установим статус документа в БД
-                deliveryAct.setStatus(1);
+                try {
+                    // Получим результат JSON
+                    JSONObject jsonResult = new JSONObject(result.get(Constants.WEB_SERVICE_RESULT).toString());
 
-                deliveryActsViewModel.updateDeliveryAct(deliveryAct);
+                    if (jsonResult.getBoolean(Constants.WEB_SERVICE_RESULT) == true) {
+                        // Установим статус документа в БД
+                        deliveryAct.setStatus(status);
 
-                activity.setResult(1);
-                activity.finish();
+                        deliveryActsViewModel.updateDeliveryAct(deliveryAct);
+
+                        activity.setResult(1);
+                        activity.finish();
+                    }else{
+                        progressBar.setVisibility(View.GONE);
+                        String message = jsonResult.getString(Constants.WEB_SERVICE_MSG);
+
+                        DialogFactory.showAlertDialog(getContext(), message);
+                    }
+                } catch (JSONException e) {
+                    progressBar.setVisibility(View.GONE);
+                    DialogFactory.showAlertDialog(getContext(), e.toString());
+                }
             }else{
                 progressBar.setVisibility(View.GONE);
 
                 DialogFactory.showAlertDialog(getContext(), result.get(Constants.WEB_SERVICE_MSG).toString());
             }
-
-
         }
 
         @Override
@@ -279,10 +318,13 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
             JSONArray jsonFiles = new JSONArray();
 
             try {
+                // ID документов и тип документа.
                 jsonAnswer.put("documentId", deliveryAct.getId());
                 jsonAnswer.put("documentType", deliveryAct.getType());
+                jsonAnswer.put("documentStatus", status);
                 jsonAnswer.put("deliveryActId", deliveryAct.getActId());
 
+                // Кодируем картинки в BASE64.
                 if (lists.length > 0 && lists != null) {
                     if (lists[0].size() > 0) {
                         for (String file : lists[0]) {
@@ -310,7 +352,7 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
         }
     }
 
-    String encodeImageToBase64(String file){
+    private String encodeImageToBase64(String file){
         // Получаем битовую карту изображения
         Bitmap bitmap = BitmapFactory.decodeFile(file);
 

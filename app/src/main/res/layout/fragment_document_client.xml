@@ -158,14 +158,34 @@
         app:layout_constraintStart_toStartOf="parent">
     </Button>
 
-    <ProgressBar
+    <LinearLayout
         android:id="@+id/document_progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></ProgressBar>
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"></ProgressBar>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/document_textSize"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:text="@string/send_data_to_server">
+        </TextView>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

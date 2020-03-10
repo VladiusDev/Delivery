@@ -56,8 +56,8 @@ public class DocumentGoodsFragment extends Fragment {
 
         documentId = getArguments().getString("documentId");
 
-        productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
-        barcodeViewModel = ViewModelProviders.of(this).get(BarcodeViewModel.class);
+        productViewModel      = ViewModelProviders.of(this).get(ProductViewModel.class);
+        barcodeViewModel      = ViewModelProviders.of(this).get(BarcodeViewModel.class);
 
         floatingActionButton = view.findViewById(R.id.document_floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {

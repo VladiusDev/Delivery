@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,7 @@ public class DocumentsFragment extends Fragment {
     private SearchView searchView;
     private FloatingActionButton floatingActionButton;
     private ConstraintLayout constraintLayout;
+    private LinearLayout linearLayoutEmpty;
 
     private final static int DELIVERY_ACT_SAVE_CODE = 1;
 
@@ -77,6 +79,7 @@ public class DocumentsFragment extends Fragment {
         productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
         barcodeViewModel = ViewModelProviders.of(this).get(BarcodeViewModel.class);
 
+        linearLayoutEmpty = view.findViewById(R.id.documents_empty);
         constraintLayout = view.findViewById(R.id.documents_constraintLayout);
         timeTextView = view.findViewById(R.id.documents_time);
         completedTextView = view.findViewById(R.id.documents_completed);
@@ -203,6 +206,14 @@ public class DocumentsFragment extends Fragment {
                 adapter.setDocuments(deliveryActs);
 
                 updateQuantityTasks();
+
+                if (deliveryActs.size() > 0 ) {
+                    linearLayoutEmpty.setVisibility(View.INVISIBLE);
+                    swipeRefreshLayout.setVisibility(View.VISIBLE);
+                }else{
+                    linearLayoutEmpty.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setVisibility(View.INVISIBLE);
+                }
             }
         });
     }
@@ -216,7 +227,7 @@ public class DocumentsFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == DELIVERY_ACT_SAVE_CODE){
+        if (requestCode == DELIVERY_ACT_SAVE_CODE && resultCode == DELIVERY_ACT_SAVE_CODE){
             Snackbar snackbar = Snackbar
                     .make(constraintLayout, getResources().getString(R.string.document_saved), Snackbar.LENGTH_LONG);
             snackbar.show();

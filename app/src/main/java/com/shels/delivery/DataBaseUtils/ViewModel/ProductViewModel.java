@@ -54,6 +54,26 @@ public class ProductViewModel extends AndroidViewModel{
         new DeleteAllProductsTask().execute();
     }
 
+    public int getScanned(String documentId){
+        try {
+            return new GetScannedTask().execute(documentId).get();
+        } catch (ExecutionException e) {
+            return 0;
+        } catch (InterruptedException e) {
+            return 0;
+        }
+    }
+
+    public int getAmount(String documentId){
+        try {
+            return new GetAmountTask().execute(documentId).get();
+        } catch (ExecutionException e) {
+            return 0;
+        } catch (InterruptedException e) {
+            return 0;
+        }
+    }
+
     private class GetProductsByDocumentIdTask extends AsyncTask<String, Void, LiveData<List<Product>>>{
         @Override
         protected LiveData<List<Product>> doInBackground(String... strings) {
@@ -99,8 +119,30 @@ public class ProductViewModel extends AndroidViewModel{
     private class GetProductByProductDocumentIdTask extends AsyncTask<String, Void, Product>{
         @Override
         protected Product doInBackground(String... strings) {
-            if (strings.length > 0 && strings != null){
+            if (strings != null && strings.length > 0){
                 return dataBase.productDao().getProductByProductDocumentId(strings[0], strings[1]);
+            }
+
+            return null;
+        }
+    }
+
+    private class GetScannedTask extends AsyncTask<String, Void, Integer>{
+        @Override
+        protected Integer doInBackground(String... strings) {
+            if (strings != null && strings.length > 0 ){
+                return dataBase.productDao().getScanned(strings[0]);
+            }
+
+            return null;
+        }
+    }
+
+    private class GetAmountTask extends AsyncTask<String, Void, Integer>{
+        @Override
+        protected Integer doInBackground(String... strings) {
+            if (strings != null && strings.length > 0 ){
+                return dataBase.productDao().getAmount(strings[0]);
             }
 
             return null;

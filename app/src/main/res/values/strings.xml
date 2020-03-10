@@ -50,6 +50,10 @@
     <string name="client_call">Выполнить вызов абоненту</string>
     <string name="act_photo">Сфотографируйте акт приемки с подписью клиента.</string>
     <string name="camera_not_found">Похоже что ваше устройство не поддерживает работу с камерой :(</string>
-    <string name="document_execute_task">ЗАКРЫТЬ ЗАДАЧУ</string>
+    <string name="document_execute_task">ВЫПОЛНИТЬ ЗАДАЧУ</string>
     <string name="document_saved">Накладная успешно сохранена!</string>
+    <string name="send_data_to_server">Отправка данных на сервер...</string>
+    <string name="images_download">Загрузка изображений...</string>
+    <string name="empty_state_photos">Фотографий пока ещё нет...</string>
+    <string name="empty_state_documents">Документов пока ещё нет...</string>
 </resources>
