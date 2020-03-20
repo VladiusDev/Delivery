@@ -38,7 +38,10 @@ public class DocumentActivity extends AppCompatActivity {
         }
 
         if (documentId != null){
-            deliveryAct = deliveryActsViewModel.getDeliveryActById(documentId);
+            if (deliveryAct == null) {
+                deliveryAct = deliveryActsViewModel.getDeliveryActById(documentId);
+            }
+
             if (deliveryAct != null){
                 String documentType = DataUtils.getDocumentNameById(this, deliveryAct.getType());
 
@@ -49,18 +52,19 @@ public class DocumentActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.document_TabLayout);
         tabLayout.addTab(tabLayout.newTab().setText(getResources().getString(R.string.document_tab_client)));
         tabLayout.addTab(tabLayout.newTab().setText(getResources().getString(R.string.document_tab_goods)));
-        tabLayout.addTab(tabLayout.newTab().setText("Документы"));
+        tabLayout.addTab(tabLayout.newTab().setText(getResources().getString(R.string.document_tab_documents)));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = findViewById(R.id.document_pager);
         final DocumentPagerAdapter adapter = new DocumentPagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount(), documentId);
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                viewPager.setCurrentItem(tab.getPosition(), true);
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {

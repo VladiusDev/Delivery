@@ -41,7 +41,7 @@ import com.yandex.runtime.image.ImageProvider;
 import java.util.List;
 
 
-public class ClientsMapFragment extends Fragment implements Session.SearchListener, CameraListener, MapObjectTapListener {
+public class ClientsMapFragment extends Fragment implements Session.SearchListener, MapObjectTapListener {
 
     private MapView mapView;
     private DeliveryActsViewModel viewModel;
@@ -66,11 +66,9 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
         searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED);
 
         mapView = view.findViewById(R.id.yandex_mapView);
-        mapView.getMap().addCameraListener(cameraListener);
-
         mapView.getMap().move(
                     new CameraPosition(new Point(45.389194, 33.993751), 8.0f, 0.0f, 0.0f),
-                    new Animation(Animation.Type.SMOOTH, 5),
+                    new Animation(Animation.Type.LINEAR, 0),
                     null);
 
         getData();
@@ -96,7 +94,7 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
             @Override
             public void onChanged(List<DeliveryAct> deliveryActs) {
                 MapObjectCollection mapObjects = mapView.getMap().getMapObjects();
-                mapObjects.clear();
+                //mapObjects.clear();
 
                 for (DeliveryAct deliveryAct : deliveryActs){
                     submitQuery(deliveryAct.getDeliveryAddress());
@@ -114,11 +112,6 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
     }
 
     @Override
-    public void onCameraPositionChanged(@NonNull Map map, @NonNull CameraPosition cameraPosition, @NonNull CameraUpdateSource cameraUpdateSource, boolean b) {
-
-    }
-
-    @Override
     public void onSearchResponse(@NonNull Response response) {
         MapObjectCollection mapObjects = mapView.getMap().getMapObjects();
 
@@ -128,7 +121,7 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
                 Context context = getContext();
 
                 if (context != null) {
-                    ImageProvider resourceBackedImage = ImageProvider.fromResource(context, R.drawable.search_layer_pin_icon_default);
+                    ImageProvider resourceBackedImage = ImageProvider.fromResource(context, R.drawable.search_layer_pin_dust_default);
                     PlacemarkMapObject placemark = mapObjects.addPlacemark(resultLocation, resourceBackedImage);
                     placemark.addTapListener(this);
                 }

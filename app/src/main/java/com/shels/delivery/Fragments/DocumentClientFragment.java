@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -33,6 +34,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.shels.delivery.Constants;
 import com.shels.delivery.Data.DeliveryAct;
 import com.shels.delivery.DataBaseUtils.ViewModel.DeliveryActsViewModel;
+import com.shels.delivery.DataBaseUtils.ViewModel.DocumentViewModel;
 import com.shels.delivery.DataBaseUtils.ViewModel.ProductViewModel;
 import com.shels.delivery.DialogFactory;
 import com.shels.delivery.R;
@@ -40,10 +42,7 @@ import com.shels.delivery.WebService.WebService1C;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.GeoObjectCollection;
 import com.yandex.mapkit.geometry.Point;
-import com.yandex.mapkit.map.CameraListener;
 import com.yandex.mapkit.map.CameraPosition;
-import com.yandex.mapkit.map.CameraUpdateSource;
-import com.yandex.mapkit.map.Map;
 import com.yandex.mapkit.map.MapObjectCollection;
 import com.yandex.mapkit.map.VisibleRegionUtils;
 import com.yandex.mapkit.mapview.MapView;
@@ -65,7 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class DocumentClientFragment extends Fragment implements Session.SearchListener, CameraListener {
+public class DocumentClientFragment extends Fragment implements Session.SearchListener{
     private String documentId;
     private TextView client;
     private TextView phone;
@@ -73,18 +72,31 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
     private DeliveryAct deliveryAct;
     private DeliveryActsViewModel deliveryActsViewModel;
     private ProductViewModel productViewModel;
+    private DocumentViewModel documentViewModel;
     private MapView mapView;
     private SearchManager searchManager;
     private Session searchSession;
     private Button buttonExecuteTask;
     private LinearLayout progressBar;
     private Activity activity;
+    private CameraPosition cameraPosition;
 
     private static final int REQUEST_PHONE_CALL = 1;
 
-
     public DocumentClientFragment() {
 
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+        deliveryActsViewModel = ViewModelProviders.of(getActivity()).get(DeliveryActsViewModel.class);
+        productViewModel = ViewModelProviders.of(getActivity()).get(ProductViewModel.class);
+        documentViewModel = ViewModelProviders.of(getActivity()).get(DocumentViewModel.class);
+
+        setRetainInstance(true);
     }
 
     @Override
@@ -94,9 +106,6 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
 
         documentId = getArguments().getString("documentId");
 
-        deliveryActsViewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
-        productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
-
         activity = getActivity();
 
         progressBar = view.findViewById(R.id.document_progressBar);
@@ -104,6 +113,7 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
         client = view.findViewById(R.id.document_client);
         phone = view.findViewById(R.id.document_phone);
         address = view.findViewById(R.id.document_address);
+        mapView = view.findViewById(R.id.document_mapView);
 
         phone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,14 +140,16 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
 
         searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED);
 
-        mapView = view.findViewById(R.id.document_mapView);
-        mapView.getMap().addCameraListener(this);
-
         submitQuery(address.getText().toString());
 
-        setHasOptionsMenu(true);
-
         return view;
+    }
+
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     private void submitQuery(String query) {
@@ -146,6 +158,7 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
                 VisibleRegionUtils.toPolygon(mapView.getMap().getVisibleRegion()),
                 new SearchOptions(),
                 this);
+
     }
 
     private void executeTask(){
@@ -177,11 +190,6 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
     }
 
     @Override
-    public void onCameraPositionChanged(@NonNull Map map, @NonNull CameraPosition cameraPosition, @NonNull CameraUpdateSource cameraUpdateSource, boolean finished) {
-
-    }
-
-    @Override
     public void onSearchResponse(@NonNull Response response) {
         MapObjectCollection mapObjects = mapView.getMap().getMapObjects();
         mapObjects.clear();
@@ -198,7 +206,7 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
 
                     mapView.getMap().move(
                             new CameraPosition(resultLocation, 15.0f, 0.0f, 0.0f),
-                            new Animation(Animation.Type.SMOOTH, 1),
+                            new Animation(Animation.Type.LINEAR, 0),
                             null);
                 }
 
@@ -207,6 +215,11 @@ public class DocumentClientFragment extends Fragment implements Session.SearchLi
                 break;
             }
         }
+    }
+
+    @Override
+    public void setRetainInstance(boolean retain) {
+        super.setRetainInstance(retain);
     }
 
     @Override

@@ -51,25 +51,15 @@ public class MainActivity extends AppCompatActivity {
     private ProductViewModel productViewModel;
     private BarcodeViewModel barcodeViewModel;
     private ConstraintLayout constraintLayout;
-    private DocumentsFragment documentsFragment;
-    private ClientsMapFragment clientsMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            documentsFragment = (DocumentsFragment) getSupportFragmentManager().getFragment(savedInstanceState, "documentsFragment");
-            clientsMapFragment = (ClientsMapFragment) getSupportFragmentManager().getFragment(savedInstanceState, "clientsMapFragment");
-        }else{
-            documentsFragment = new DocumentsFragment();
-            clientsMapFragment = new ClientsMapFragment();
-
-            MapKitFactory.setApiKey(Constants.YANDEX_MAPS_API_KEY);
-            MapKitFactory.initialize(this);
-            SearchFactory.initialize(this);
-        }
+        MapKitFactory.setApiKey(Constants.YANDEX_MAPS_API_KEY);
+        MapKitFactory.initialize(this);
+        SearchFactory.initialize(this);
 
         context = this;
         activity = this;
@@ -181,9 +171,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        getSupportFragmentManager().putFragment(outState, "documentsFragment", documentsFragment);
-        getSupportFragmentManager().putFragment(outState, "clientsMapFragment", clientsMapFragment);
     }
 
     public class MainPagerAdapter extends FragmentStatePagerAdapter {
@@ -197,9 +184,9 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return documentsFragment;
+                    return new DocumentsFragment();
                 case 1:
-                    return clientsMapFragment;
+                    return new ClientsMapFragment();
                 default:
                     return null;
             }

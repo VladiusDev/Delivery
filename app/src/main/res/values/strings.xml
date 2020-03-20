@@ -56,4 +56,5 @@
     <string name="images_download">Загрузка изображений...</string>
     <string name="empty_state_photos">Фотографий пока ещё нет...</string>
     <string name="empty_state_documents">Документов пока ещё нет...</string>
+    <string name="document_tab_documents">Документы</string>
 </resources>

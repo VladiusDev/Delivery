@@ -11,8 +11,8 @@ import com.shels.delivery.Fragments.DocumentGoodsFragment;
 import com.shels.delivery.Fragments.DocumentPhotoFragment;
 
 public class DocumentPagerAdapter extends FragmentStatePagerAdapter {
-    int mNumOfTabs;
-    String documentId;
+    private int mNumOfTabs;
+    private String documentId;
 
     public DocumentPagerAdapter(FragmentManager fm, int NumOfTabs, String documentId) {
         super(fm);
