@@ -1,12 +1,11 @@
 package com.shels.delivery.Activity;
 
-import android.content.ContentValues;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -16,13 +15,19 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import com.shels.delivery.AuthorizationUtils;
 import com.shels.delivery.Constants;
 import com.shels.delivery.DialogFactory;
-import com.shels.delivery.JsonUtils.JsonParser1C;
 import com.shels.delivery.R;
-import com.shels.delivery.WebService.WebService1C;
+import com.shels.delivery.Retrofit.ApiFactory;
+import com.shels.delivery.Retrofit.ApiService;
+import com.shels.delivery.Retrofit.UserInfo;
 
 import br.com.simplepass.loadingbutton.customViews.CircularProgressButton;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 public class LoginActivity extends AppCompatActivity {
     private CircularProgressButton btn_auth;
@@ -38,31 +43,88 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        context = this;
+        context     = this;
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
         savePassword = findViewById(R.id.save_password);
-        btn_auth = findViewById(R.id.btn_auth);
-        edt_login = findViewById(R.id.edt_login);
+        btn_auth     = findViewById(R.id.btn_auth);
+        edt_login    = findViewById(R.id.edt_login);
         edt_password = findViewById(R.id.edt_password);
 
         btn_auth.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("CheckResult")
             @Override
             public void onClick(View v) {
-                preferences.edit().putString(Constants.PREFERENCE_USER, edt_login.getText().toString()).apply();
-                preferences.edit().putString(Constants.PREFERENCE_USER_PASSWORD, edt_password.getText().toString()).apply();
-                preferences.edit().putBoolean(Constants.PREFERENCE_USER_SAVE_PASSWORD, savePassword.isChecked()).apply();
+                Boolean hasConnection = AuthorizationUtils.hasConnection(context);
 
-                new AuthorizationTask().execute();
+                if (hasConnection) {
+                    btn_auth.startAnimation();
+
+                    String usr = edt_login.getText().toString();
+                    String pas = edt_password.getText().toString();
+
+                    // Save login and pass
+                    preferences.edit().putString(Constants.PREFERENCE_USER, usr).apply();
+                    preferences.edit().putString(Constants.PREFERENCE_USER_PASSWORD, pas).apply();
+                    preferences.edit().putBoolean(Constants.PREFERENCE_USER_SAVE_PASSWORD, savePassword.isChecked()).apply();
+
+                    // Execute auth
+                    ApiFactory apiFactory = ApiFactory.getInstance(getApplicationContext());
+                    ApiService apiService = apiFactory.getApiService();
+
+                    apiService.getUserInfo()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Consumer<UserInfo>() {
+                                @Override
+                                public void accept(UserInfo userInfoResult) throws Exception {
+                                    // Save user info
+                                    preferences.edit().putBoolean(Constants.PREFERENCE_USER_AUTH_SUCCESS, true).apply();
+                                    preferences.edit().putString("name",     userInfoResult.getName()).apply();
+                                    preferences.edit().putString("username", userInfoResult.getUsername()).apply();
+                                    preferences.edit().putString("group",    userInfoResult.getGroup()).apply();
+                                    preferences.edit().putString("id",       userInfoResult.getId()).apply();
+
+                                    // Set picture to the button
+                                    Bitmap doneBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_done_white_48dp);
+                                    btn_auth.doneLoadingAnimation(R.color.mainColor, doneBitmap);
+
+                                    // Finish login activity
+                                    finish();
+
+                                    // Open main activity
+                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            }, new Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable throwable) throws Exception {
+                                    if (throwable instanceof HttpException) {
+                                        HttpException exception = (HttpException) throwable;
+                                        switch (exception.code()){
+                                            case 401:
+                                                btn_auth.revertAnimation();
+                                                DialogFactory.showAlertDialog(context, context.getString(R.string.login_error), context.getString(R.string.check_error_authorization));
+                                                break;
+                                            default:
+                                                DialogFactory.showAlertDialog(context, exception.getMessage(), context.getString(R.string.error));
+                                                btn_auth.revertAnimation();
+                                        }
+                                    }
+                                }
+                            });
+                } else {
+                    DialogFactory.showAlertDialog(context, context.getString(R.string.check_hasConnection), context.getString(R.string.error));
+                }
             }
         });
 
-        //Проверим сохранены ли данные авторизации и была ли выполнена успешная авторизация
+        // Auth check
         if (preferences.contains(Constants.PREFERENCE_USER_SAVE_PASSWORD) && preferences.contains(Constants.PREFERENCE_USER_AUTH_SUCCESS)){
-            if (preferences.getBoolean(Constants.PREFERENCE_USER_SAVE_PASSWORD, false) == true
-                    && preferences.getBoolean(Constants.PREFERENCE_USER_AUTH_SUCCESS, false) == true){
+            if (preferences.getBoolean(Constants.PREFERENCE_USER_SAVE_PASSWORD, false)
+                    && preferences.getBoolean(Constants.PREFERENCE_USER_AUTH_SUCCESS, false)){
                 finish();
 
                 Intent intent = new Intent(this, MainActivity.class);
@@ -70,49 +132,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
 
-        // Отобразим сохраненное имя пользователя
+        // Show username
         if (preferences.contains(Constants.PREFERENCE_USER)){
             edt_login.setText(preferences.getString(Constants.PREFERENCE_USER, ""));
-        }
-    }
-
-    private class AuthorizationTask extends AsyncTask<Void, Void, ContentValues>{
-        @Override
-        protected ContentValues doInBackground(Void... voids) {
-             return WebService1C.sendRequest(Constants.SOAP_METHOD_GET_USER_INFO, getApplicationContext());
-        }
-
-        @Override
-        protected void onPreExecute() {
-            btn_auth.startAnimation();
-        }
-
-        @Override
-        protected void onPostExecute(ContentValues contentValues) {
-           if ((Boolean) contentValues.get("authorization") == true) {
-                // Установим картинку на кнопку авторизации при успешной авторизации
-                Bitmap doneBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_done_white_48dp);
-
-                btn_auth.doneLoadingAnimation(R.color.mainColor, doneBitmap);
-
-                // Получим данные о пользователи с результата JSON
-                ContentValues userInfo = JsonParser1C.getUserInfo(contentValues.get("result").toString());
-
-                // Сохраним данные пользователя
-                preferences.edit().putBoolean(Constants.PREFERENCE_USER_AUTH_SUCCESS, true).apply();
-                preferences.edit().putString(Constants.PREFERENCE_USER_PROFILE, userInfo.get(Constants.JSON_FIELD_USER_PROFILE).toString()).apply();
-                preferences.edit().putString(Constants.PREFERENCE_USER_ID, userInfo.get(Constants.JSON_FIELD_USER_ID).toString()).apply();
-
-                // Открываем основное приложение
-               finish();
-
-               Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-               startActivity(intent);
-           }else{
-               btn_auth.revertAnimation();
-
-               DialogFactory.showAlertDialog(context, contentValues.get("message").toString(), context.getString(R.string.check_error_authorization));
-           }
         }
     }
 

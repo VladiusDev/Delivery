@@ -23,7 +23,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shels.delivery.Data.DeliveryAct;
@@ -62,7 +62,7 @@ public class DocumentPhotoFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_document_photo, container, false);
 
-        deliveryActsViewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
+        deliveryActsViewModel = new ViewModelProvider(this).get(DeliveryActsViewModel.class);
 
         documentId = getArguments().getString("documentId");
         deliveryAct = deliveryActsViewModel.getDeliveryActById(documentId);
@@ -190,6 +190,7 @@ public class DocumentPhotoFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
+            linearLayoutEmpty.setVisibility(View.INVISIBLE);
         }
 
         @Override

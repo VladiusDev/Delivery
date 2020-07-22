@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +43,7 @@ public class ClientsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_clients, container, false);
 
-        viewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(DeliveryActsViewModel.class);
 
         adapter = new ClientsAdapter(deliveryActs);
 

@@ -38,7 +38,7 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ClientsV
     public void onBindViewHolder(@NonNull ClientsViewHolder holder, int position) {
         DeliveryAct deliveryAct = deliveryActs.get(position);
 
-        holder.name.setText(deliveryAct.getClient());
+        holder.name.setText(deliveryAct.getDocClient());
     }
 
     @Override

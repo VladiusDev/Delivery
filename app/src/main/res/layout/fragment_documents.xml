@@ -34,7 +34,7 @@
                 android:textSize="22dp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"></TextView>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/documents_time"
@@ -46,7 +46,7 @@
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/documents_tv_today"
-                tools:text="15 фев, 2020"></TextView>
+                tools:text="15 фев, 2020" />
 
             <TextView
                 android:id="@+id/documents_completed_tv"
@@ -59,7 +59,7 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/documents_tv_today"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/documents_tv_today"></TextView>
+                app:layout_constraintTop_toTopOf="@+id/documents_tv_today" />
 
             <TextView
                 android:id="@+id/documents_completed"
@@ -72,7 +72,7 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="@+id/documents_completed_tv"
                 app:layout_constraintStart_toStartOf="@+id/documents_completed_tv"
-                app:layout_constraintTop_toBottomOf="@+id/documents_completed_tv"></TextView>
+                app:layout_constraintTop_toBottomOf="@+id/documents_completed_tv" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -100,35 +100,53 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/documents_recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/documents_empty"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/documents_swipeRefreshLayout">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/documents_recyclerView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/documents_image_imptyState"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="100dp"
+                android:src="@drawable/documents"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/documents_tv_emptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_state_documents"
+                android:gravity="center"
+                android:textSize="14dp"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/documents_recyclerView"
+                app:layout_constraintTop_toBottomOf="@+id/documents_image_imptyState" />"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <LinearLayout
-        android:id="@+id/documents_empty"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/documents_swipeRefreshLayout">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/documents"></ImageView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/empty_state_documents"
-            android:textSize="14dp"></TextView>
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/document_photo_progressBar"
@@ -148,7 +166,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"></ProgressBar>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -156,7 +174,5 @@
             android:text="@string/images_download">
         </TextView>
     </LinearLayout>
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

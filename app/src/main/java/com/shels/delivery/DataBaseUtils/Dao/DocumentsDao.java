@@ -14,19 +14,19 @@ import java.util.List;
 @Dao
 public interface DocumentsDao {
 
-    @Query("SELECT * FROM deliveryActs ORDER BY time")
+    @Query("SELECT * FROM deliveryActs ORDER BY docTime")
     LiveData<List<DeliveryAct>> getAllDeliveryActs();
 
     @Query("SELECT * FROM deliveryActs WHERE id = :id")
     DeliveryAct getDeliveryActById(String id);
 
-    @Query("SELECT * FROM deliveryActs WHERE barcode = :barcode LIMIT 1")
+    @Query("SELECT * FROM deliveryActs WHERE docBarcode = :barcode LIMIT 1")
     DeliveryAct getDeliveryActByBarcode(String barcode);
 
-    @Query("SELECT * FROM deliveryActs WHERE client LIKE  '%' || :filter || '%' OR time LIKE  '%' || :filter || '%' OR type LIKE  '%' || :filter || '%' OR clientPhone LIKE  '%' || :filter || '%'")
+    @Query("SELECT * FROM deliveryActs WHERE docClient LIKE  '%' || :filter || '%' OR docTime LIKE  '%' || :filter || '%' OR docType LIKE  '%' || :filter || '%' OR docClientPhone LIKE  '%' || :filter || '%'")
     List<DeliveryAct> getDeliveryActsByFilter(String filter);
 
-    @Query("SELECT COUNT (*) FROM deliveryActs WHERE status = 1 OR status = 2")
+    @Query("SELECT COUNT (*) FROM deliveryActs WHERE docStatus = 1 OR docStatus = 2")
     int getCompletedDeliveryActs();
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

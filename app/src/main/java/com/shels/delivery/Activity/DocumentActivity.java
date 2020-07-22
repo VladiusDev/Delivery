@@ -43,7 +43,7 @@ public class DocumentActivity extends AppCompatActivity {
             }
 
             if (deliveryAct != null){
-                String documentType = DataUtils.getDocumentNameById(this, deliveryAct.getType());
+                String documentType = DataUtils.getDocumentNameById(this, deliveryAct.getDocType());
 
                 actionBar.setTitle(documentType);
             }

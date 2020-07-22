@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,8 +23,10 @@ import com.google.zxing.integration.android.IntentResult;
 import com.shels.delivery.Adapters.ProductsAdapter;
 import com.shels.delivery.BarcodeScanner.BarcodeScannerUtils;
 import com.shels.delivery.Data.Barcode;
+import com.shels.delivery.Data.DeliveryAct;
 import com.shels.delivery.Data.Product;
 import com.shels.delivery.DataBaseUtils.ViewModel.BarcodeViewModel;
+import com.shels.delivery.DataBaseUtils.ViewModel.DeliveryActsViewModel;
 import com.shels.delivery.DataBaseUtils.ViewModel.ProductViewModel;
 import com.shels.delivery.R;
 
@@ -37,11 +39,13 @@ public class DocumentGoodsFragment extends Fragment {
     private RecyclerView recyclerView;
     private ProductViewModel productViewModel;
     private BarcodeViewModel barcodeViewModel;
+    private DeliveryActsViewModel deliveryActsViewModel;
     private ProductsAdapter productsAdapter;
     private final List<Product> products = new ArrayList<>();
     private ArrayList<String> barcodes;
     private Fragment fragment;
     private FloatingActionButton floatingActionButton;
+    private DeliveryAct deliveryAct;
 
     public DocumentGoodsFragment() {
 
@@ -52,12 +56,14 @@ public class DocumentGoodsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_document_goods, container, false);
 
+        productViewModel      = new ViewModelProvider(this).get(ProductViewModel.class);
+        barcodeViewModel      = new ViewModelProvider(this).get(BarcodeViewModel.class);
+        deliveryActsViewModel = new ViewModelProvider(this).get(DeliveryActsViewModel.class);
+
         fragment = this;
 
         documentId = getArguments().getString("documentId");
-
-        productViewModel      = ViewModelProviders.of(this).get(ProductViewModel.class);
-        barcodeViewModel      = ViewModelProviders.of(this).get(BarcodeViewModel.class);
+        deliveryAct = deliveryActsViewModel.getDeliveryActById(documentId);
 
         floatingActionButton = view.findViewById(R.id.document_floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -81,11 +87,11 @@ public class DocumentGoodsFragment extends Fragment {
     }
 
     private void getData(){
-        LiveData<List<Product>> productsFromDB = productViewModel.getProductsByDocumentId(documentId);
-        productsFromDB.observe(this, new Observer<List<Product>>() {
+        LiveData<List<Product>> productsFromDB = productViewModel.getProductsByDocumentId(deliveryAct.getDocId());
+        productsFromDB.observe(getViewLifecycleOwner(), new Observer<List<Product>>() {
             @Override
             public void onChanged(List<Product> products) {
-                // Получим штрих-кода по всем товарам
+                // Get barcodes
                 barcodes = new ArrayList<>();
 
                 for (Product product : products){
@@ -96,7 +102,7 @@ public class DocumentGoodsFragment extends Fragment {
                     }
                 }
 
-                // Обновим список товаров
+                // Update products list
                 productsAdapter.setProducts(products);
             }
         });

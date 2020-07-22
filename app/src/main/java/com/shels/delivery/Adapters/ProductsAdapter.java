@@ -35,8 +35,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
         Product product = products.get(position);
         int amount = product.getAmount();
         int scanned = product.getScanned();
-        String name = product.getName();
-        String characteristic = product.getCharacteristic();
+        String name = product.getProductName();
+        String characteristic = product.getCharacteristicName();
 
         holder.amount.setText(Integer.toString(amount));
         holder.productName.setText(name);

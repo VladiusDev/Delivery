@@ -1,24 +1,24 @@
 package com.shels.delivery.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -29,22 +29,25 @@ import com.shels.delivery.Activity.DocumentActivity;
 import com.shels.delivery.Adapters.DocumentsAdapter;
 import com.shels.delivery.AuthorizationUtils;
 import com.shels.delivery.BarcodeScanner.BarcodeScannerUtils;
-import com.shels.delivery.Constants;
 import com.shels.delivery.Data.Barcode;
 import com.shels.delivery.Data.DeliveryAct;
 import com.shels.delivery.Data.Product;
 import com.shels.delivery.DataBaseUtils.ViewModel.BarcodeViewModel;
 import com.shels.delivery.DataBaseUtils.ViewModel.DeliveryActsViewModel;
 import com.shels.delivery.DataBaseUtils.ViewModel.ProductViewModel;
-import com.shels.delivery.JsonUtils.JsonParser1C;
 import com.shels.delivery.R;
-import com.shels.delivery.WebService.WebService1C;
+import com.shels.delivery.Retrofit.ApiFactory;
+import com.shels.delivery.Retrofit.ApiService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 public class DocumentsFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -60,7 +63,9 @@ public class DocumentsFragment extends Fragment {
     private SearchView searchView;
     private FloatingActionButton floatingActionButton;
     private ConstraintLayout constraintLayout;
-    private LinearLayout linearLayoutEmpty;
+    private ConstraintLayout linearLayoutEmpty;
+    private ImageView imageEmptyState;
+    private TextView tvEmptyState;
 
     private final static int DELIVERY_ACT_SAVE_CODE = 1;
 
@@ -75,15 +80,18 @@ public class DocumentsFragment extends Fragment {
 
         activity = this.getActivity();
 
-        deliveryActsViewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
-        productViewModel = ViewModelProviders.of(this).get(ProductViewModel.class);
-        barcodeViewModel = ViewModelProviders.of(this).get(BarcodeViewModel.class);
+        deliveryActsViewModel = new ViewModelProvider(this).get(DeliveryActsViewModel.class);
+        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+        barcodeViewModel = new ViewModelProvider(this).get(BarcodeViewModel.class);
 
         linearLayoutEmpty = view.findViewById(R.id.documents_empty);
         constraintLayout = view.findViewById(R.id.documents_constraintLayout);
         timeTextView = view.findViewById(R.id.documents_time);
         completedTextView = view.findViewById(R.id.documents_completed);
         searchView = activity.findViewById(R.id.main_searchView);
+        imageEmptyState = view.findViewById(R.id.documents_image_imptyState);
+        tvEmptyState = view.findViewById(R.id.documents_tv_emptyState);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -128,6 +136,7 @@ public class DocumentsFragment extends Fragment {
                 downloadDataToDB();
             }
         });
+
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
@@ -149,71 +158,88 @@ public class DocumentsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerView.setAdapter(adapter);
 
-        downloadDataToDB();
-
-        getData();
-
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        downloadDataToDB();
+
+        getDataFromDB();
+    }
+
+    @SuppressLint("CheckResult")
     private void downloadDataToDB(){
-        new DownloadDataToDbTask().execute();
-    }
-
-    private class DownloadDataToDbTask extends AsyncTask<Void, Void, ContentValues> {
-
-        @Override
-        protected void onPreExecute() {
+        if (AuthorizationUtils.hasConnection(getContext())) {
             swipeRefreshLayout.setRefreshing(true);
-        }
 
-        @Override
-        protected void onPostExecute(ContentValues jsonResult) {
-            // Парсим JSON результат
-            if ((Boolean) jsonResult.get(Constants.WEB_SERVICE_AUTH) == true) {
-                String jsonData = jsonResult.get(Constants.WEB_SERVICE_RESULT).toString();
+            // Get data from 1C API
+            ApiFactory apiFactory = ApiFactory.getInstance(getContext());
+            ApiService apiService = apiFactory.getApiService();
+            apiService.getDeliveryActs()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<List<DeliveryAct>>() {
+                        @Override
+                        public void accept(List<DeliveryAct> deliveryActs) throws Exception {
+                            // Delivery acts
+                            deliveryActsViewModel.insertDeliveryActs(deliveryActs);
+                            for (DeliveryAct deliveryAct : deliveryActs) {
+                                // Products
+                                List<Product> products = deliveryAct.getProducts();
+                                productViewModel.insertProducts(products);
 
-                HashMap result = JsonParser1C.getDeliveryActs(jsonData);
+                                for (Product product : products) {
+                                    // Barcodes
+                                    List<Barcode> barcodes = product.getBarcodes();
+                                    barcodeViewModel.insertBarcodes(barcodes);
+                                }
+                            }
 
-                // Заносим данные в БД
-                ArrayList<DeliveryAct> deliveryActs = (ArrayList<DeliveryAct>) result.get(Constants.JSON_FIELD_DELIVERY_ACTS);
-                ArrayList<Product> goods = (ArrayList<Product>) result.get(Constants.JSON_FIELD_GOODS);
-                ArrayList<Barcode> barсodes = (ArrayList<Barcode>) result.get(Constants.JSON_FIELD_DELIVERY_BARCODES);
+                            swipeRefreshLayout.setRefreshing(false);
+                            showEmptyState();
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            if (throwable instanceof HttpException) {
+                                HttpException exception = (HttpException) throwable;
+                                switch (exception.code()) {
+                                    case 401:
+                                        // Authorization error, possibly changed the password, return to the auth page
+                                        Toast.makeText(getContext(), getResources().getString(R.string.login_error2), Toast.LENGTH_LONG).show();
 
-                deliveryActsViewModel.insertDeliveryActs(deliveryActs);
-                productViewModel.insertProducts(goods);
-                barcodeViewModel.insertBarcodes(barсodes);
-            }else{
-                Toast.makeText(getContext(), getResources().getString(R.string.check_error_authorization), Toast.LENGTH_LONG).show();
-
-                AuthorizationUtils.clearAuthorization(getContext(), getActivity());
-            }
-
+                                        AuthorizationUtils.clearAuthorization(getContext(), getActivity());
+                                        break;
+                                    default:
+                                        swipeRefreshLayout.setRefreshing(false);
+                                        Snackbar.make(constraintLayout, exception.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                                }
+                            } else {
+                                swipeRefreshLayout.setRefreshing(false);
+                                Snackbar.make(constraintLayout, throwable.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        }else{
             swipeRefreshLayout.setRefreshing(false);
+            Snackbar.make(constraintLayout, getResources().getString(R.string.check_hasConnection), Snackbar.LENGTH_LONG).show();
         }
 
-        @Override
-        protected ContentValues doInBackground(Void... voids) {
-            return WebService1C.sendRequest(Constants.SOAP_METHOD_GET_DELIVERY_ACTS, getContext());
-        }
     }
 
-    private void getData(){
+    private void getDataFromDB(){
         LiveData<List<DeliveryAct>> deliveryActsFromDB = deliveryActsViewModel.getDeliveryActs();
-        deliveryActsFromDB.observe(this, new Observer<List<DeliveryAct>>() {
+        deliveryActsFromDB.observe(getViewLifecycleOwner(), new Observer<List<DeliveryAct>>() {
             @Override
             public void onChanged(List<DeliveryAct> deliveryActs) {
                 adapter.setDocuments(deliveryActs);
 
                 updateQuantityTasks();
 
-                if (deliveryActs.size() > 0 ) {
-                    linearLayoutEmpty.setVisibility(View.INVISIBLE);
-                    swipeRefreshLayout.setVisibility(View.VISIBLE);
-                }else{
-                    linearLayoutEmpty.setVisibility(View.VISIBLE);
-                    swipeRefreshLayout.setVisibility(View.INVISIBLE);
-                }
+                showEmptyState();
             }
         });
     }
@@ -233,4 +259,19 @@ public class DocumentsFragment extends Fragment {
             snackbar.show();
         }
     }
+
+    private void showEmptyState(){
+        if (adapter.getItemCount() > 0 ) {
+            imageEmptyState.setVisibility(View.INVISIBLE);
+            tvEmptyState.setVisibility(View.INVISIBLE);
+            floatingActionButton.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }else{
+            imageEmptyState.setVisibility(View.VISIBLE);
+            tvEmptyState.setVisibility(View.VISIBLE);
+            floatingActionButton.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+        }
+    }
+
 }

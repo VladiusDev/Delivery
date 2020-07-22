@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.shels.delivery.Data.DeliveryAct;
@@ -62,7 +63,7 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_clients_map, container, false);
 
-        viewModel = ViewModelProviders.of(this).get(DeliveryActsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(DeliveryActsViewModel.class);
         searchManager = SearchFactory.getInstance().createSearchManager(SearchManagerType.COMBINED);
 
         mapView = view.findViewById(R.id.yandex_mapView);
@@ -97,7 +98,7 @@ public class ClientsMapFragment extends Fragment implements Session.SearchListen
                 //mapObjects.clear();
 
                 for (DeliveryAct deliveryAct : deliveryActs){
-                    submitQuery(deliveryAct.getDeliveryAddress());
+                    submitQuery(deliveryAct.getDocDeliveryAddress());
                 }
             }
         });

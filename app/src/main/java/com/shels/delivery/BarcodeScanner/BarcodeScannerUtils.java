@@ -20,6 +20,7 @@ public class BarcodeScannerUtils {
         IntentIntegrator intentIntegrator = new IntentIntegrator(activity);
         intentIntegrator.setCaptureActivity(Portrait.class);
         intentIntegrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+        intentIntegrator.setBeepEnabled(true);
 
         if (fragment == null) {
             intentIntegrator.initiateScan();

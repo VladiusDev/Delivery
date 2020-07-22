@@ -8,6 +8,7 @@
     <string name="check_error_authorization">Ошибка авторизации</string>
     <string name="check_error">Ошибка соединения с сервером</string>
     <string name="login_error">Неправильный логин или пароль!</string>
+    <string name="login_error2">Изменены учетные данные, либо учетная запись заблокирована!</string>
     <string name="alertDialog_ok">Понятно</string>
     <string name="save_password">Запомнить меня</string>
     <string name="error">Ошибка</string>
@@ -46,15 +47,15 @@
     <string name="call">Позвонить</string>
     <string name="document_not_found">Документ не найден!</string>
     <string name="document_find_product">Товар, найден в накладной! Продолжить сканирование?</string>
-    <string name="product_scan_successfully">Товар успешно отсканирован!</string>
+    <string name="product_scan_successfully">Товар найден в накладной, продолжить сканирование?</string>
     <string name="client_call">Выполнить вызов абоненту</string>
-    <string name="act_photo">Сфотографируйте акт приемки с подписью клиента.</string>
     <string name="camera_not_found">Похоже что ваше устройство не поддерживает работу с камерой :(</string>
     <string name="document_execute_task">ВЫПОЛНИТЬ ЗАДАЧУ</string>
     <string name="document_saved">Накладная успешно сохранена!</string>
     <string name="send_data_to_server">Отправка данных на сервер...</string>
     <string name="images_download">Загрузка изображений...</string>
-    <string name="empty_state_photos">Фотографий пока ещё нет...</string>
-    <string name="empty_state_documents">Документов пока ещё нет...</string>
+    <string name="empty_state_photos">Фотографий пока ещё нет...\n Сфотографируйте акт приемки с подписью клиента.</string>
+    <string name="empty_state_documents">Задач пока ещё нет...\n Потяните вниз для обновления.</string>
     <string name="document_tab_documents">Документы</string>
+    <string name="update">Обновить</string>
 </resources>

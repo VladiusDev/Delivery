@@ -40,12 +40,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     public void onBindViewHolder(@NonNull DocumentsViewHolder holder, int position) {
         DeliveryAct deliveryAct = documents.get(position);
 
-        String documentType = DataUtils.getDocumentNameById(holder.itemView.getContext(), deliveryAct.getType());
-        int documentStatus = deliveryAct.getStatus();
+        String documentType = DataUtils.getDocumentNameById(holder.itemView.getContext(), deliveryAct.getDocType());
+        int documentStatus = deliveryAct.getDocStatus();
 
         holder.documentType.setText(documentType);
-        holder.documentClient.setText(deliveryAct.getClient());
-        holder.documentTime.setText(deliveryAct.getTime());
+        holder.documentClient.setText(deliveryAct.getDocClient());
+        holder.documentTime.setText(deliveryAct.getDocTime());
 
         switch (documentStatus){
             case 0:
@@ -61,9 +61,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
 
     public void setDocuments(List<DeliveryAct> documents) {
-        this.documents = documents;
+         this.documents = documents;
 
-        notifyDataSetChanged();
+         notifyDataSetChanged();
     }
 
     @Override

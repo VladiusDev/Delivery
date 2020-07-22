@@ -11,16 +11,16 @@ import java.util.List;
 @Dao
 public interface BarcodeDao {
 
-    @Query("SELECT * FROM actBarcodes WHERE productId = :productId")
+    @Query("SELECT * FROM barcodes WHERE productId = :productId")
     List<Barcode> getBarcodesByProductId(String productId);
 
-    @Query("SELECT * FROM actBarcodes WHERE barcode = :barcode")
+    @Query("SELECT * FROM barcodes WHERE barcode = :barcode")
     Barcode getBarcode(String barcode);
 
     @Insert
     void insertBarcodes(List<Barcode> barcodes);
 
-    @Query("DELETE FROM actBarcodes")
+    @Query("DELETE FROM barcodes")
     void deleteAllBarcodes();
 
 }
