@@ -1,15 +1,11 @@
 package com.shels.delivery.Retrofit;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-
-import androidx.preference.PreferenceManager;
 
 import com.shels.delivery.Constants;
 
 import java.io.IOException;
 
-import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,23 +19,14 @@ public class ApiFactory{
     private static Retrofit retrofit;
 
     private ApiFactory (Context context){
-        OkHttpClient client      = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
+        OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 // Get auth data from preference
-                String usr = "";
-                String pas = "";
-
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                if (preferences.contains(Constants.PREFERENCE_USER)) {
-                    usr = preferences.getString(Constants.PREFERENCE_USER, "");
-                }
-                if (preferences.contains(Constants.PREFERENCE_USER_PASSWORD)) {
-                    pas = preferences.getString(Constants.PREFERENCE_USER_PASSWORD, "");
-                }
+                String token = "Basic " + Constants.TOKEN;
 
                 Request request = chain.request();
-                Request.Builder builder = request.newBuilder().header("Authorization", Credentials.basic(usr, pas));
+                Request.Builder builder = request.newBuilder().header("Authorization", token);
                 Request newRequest = builder.build();
 
                 return chain.proceed(newRequest);

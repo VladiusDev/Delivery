@@ -27,6 +27,7 @@ import br.com.simplepass.loadingbutton.customViews.CircularProgressButton;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Credentials;
 import retrofit2.HttpException;
 
 public class LoginActivity extends AppCompatActivity {
@@ -74,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                     ApiFactory apiFactory = ApiFactory.getInstance(getApplicationContext());
                     ApiService apiService = apiFactory.getApiService();
 
-                    apiService.getUserInfo()
+                    apiService.getUserInfo(Credentials.basic(usr, pas))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Consumer<UserInfo>() {

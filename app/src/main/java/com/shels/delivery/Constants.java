@@ -4,6 +4,7 @@ public class Constants {
 
     // 1C REST params
     public static final String SERVER_URL = "http://91.210.179.239:31080/UPP_meb_buh/hs/ExchangeService/v1/";
+    public static final String TOKEN = "c2hlbHM6MQ==";
 
     // User preferences
     public static final String PREFERENCE_USER = "pref_username";
